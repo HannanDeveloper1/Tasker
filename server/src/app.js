@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
+import asyncHandler from "express-async-handler";
 
 import ErrorMiddleware from "./middlewares/error.middleware.js";
 import ErrorHandler from "./lib/error/ErrorHandler.js";
@@ -22,6 +23,13 @@ app.use(helmet());
 app.get("/", (req, res) => res.send("Hello World!"));
 app.get("/err", (req, res, next) =>
   next(new ErrorHandler(500, "Random Error"))
+);
+
+app.get(
+  "/promise",
+  asyncHandler(async (req, res) => {
+    await Promise.reject(new ErrorHandler(500, "Random Error"));
+  })
 );
 
 app.use(ErrorMiddleware);
