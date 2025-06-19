@@ -5,52 +5,49 @@ import app from "./src/app.js";
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 
-app.on("error", (err) => {
-  console.log(err);
-});
+  const gracefulShutdown = (signal) => {
+    console.log(`${signal} received, graceful shutdown`);
+    server.close((err) => {
+      if (err) {
+        console.error("Error during server close:", err);
+        process.exit(1);
+      }
+      console.log("Server closed successfully");
+      process.exit(0);
+    });
 
-process.on("uncaughtException", (err) => {
-  console.log(err);
-});
+    // Force close after timeout
+    setTimeout(() => {
+      console.log("Forcing shutdown...");
+      process.exit(1);
+    }, 10000);
+  };
 
-process.on("unhandledRejection", (err) => {
-  console.log(err);
-});
+  process.on("SIGINT", () => {
+    console.log("SIGINT received, graceful shutdown");
+    setTimeout(() => {
+      process.exit(0);
+    }, 1000);
+    gracefulShutdown("SIGINT");
+  });
 
-process.on("SIGINT", () => {
-  console.log("SIGINT received, graceful shutdown");
-  setTimeout(() => {
-    process.exit(0);
-  }, 1000);
-});
+  process.on("SIGTERM", () => {
+    console.log("SIGTERM received, graceful shutdown");
+    setTimeout(() => {
+      process.exit(0);
+    }, 1000);
+    gracefulShutdown("SIGTERM");
+  });
 
-process.on("SIGTERM", () => {
-  console.log("SIGTERM received, graceful shutdown");
-  setTimeout(() => {
-    process.exit(0);
-  }, 1000);
-});
-
-process.on("SIGKILL", () => {
-  console.log("SIGKILL received, graceful shutdown");
-  setTimeout(() => {
-    process.exit(0);
-  }, 1000);
-});
-
-process.on("SIGHUP", () => {
-  console.log("SIGHUP received, graceful shutdown");
-  setTimeout(() => {
-    process.exit(0);
-  }, 1000);
-});
-
-process.on("exit", () => {
-  console.log("exit received, graceful shutdown");
-  setTimeout(() => {
-    process.exit(0);
-  }, 1000);
+  process.on("SIGHUP", () => {
+    console.log("SIGHUP received, graceful shutdown");
+    setTimeout(() => {
+      process.exit(0);
+    }, 1000);
+    gracefulShutdown("SIGHUP");
+  });
 });
