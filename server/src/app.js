@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 
 import ErrorMiddleware from "./middlewares/error.middleware.js";
+import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 
@@ -17,6 +18,9 @@ app.use(
 );
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(helmet());
+
+// Routes
+app.use("/api/auth", authRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import hashPassword from "../lib/utils/hashPassword";
 
 const userSchema = new mongoose.Schema(
   {
@@ -26,6 +27,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       default: null,
+      select: none,
     },
     tasks: [
       {
@@ -38,6 +40,14 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    const hashedPassword = await hashPassword(this.password);
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
 
 const User = mongoose.model("User", userSchema);
 
